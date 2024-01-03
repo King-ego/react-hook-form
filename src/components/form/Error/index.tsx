@@ -7,7 +7,7 @@ interface PropError {
 const Error: FC<PropError> = ({error}) => {
     if (!error) return null
     return (
-        <p>{error}</p>
+        <p className={`text-red-500 text-sm`}>{error}</p>
     )
 }
 

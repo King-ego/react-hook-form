@@ -5,7 +5,7 @@ interface RecursiveObject {
 export function removeEmptyKeys<T>(obj: T): T {
     for (const key in obj) {
         if (typeof obj[key] === 'object' && obj[key] !== null && obj[key] !== undefined) {
-            removeEmptyKeys(obj[key] as RecursiveObject);
+            removeEmptyKeys(obj[key]);
             if (Object.keys(obj[key] as RecursiveObject).length === 0) {
                 delete obj[key];
             }

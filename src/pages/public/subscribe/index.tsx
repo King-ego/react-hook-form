@@ -1,54 +1,51 @@
+import {useState} from "react";
+
 import {SubmitHandler, useForm} from "react-hook-form";
-import * as zod from "zod";
 
 import Input from "../../../components/form/Input";
 import ContainerInput from "../../../components/form/ContainerInput";
 import Label from "../../../components/form/Label";
 import Error from "../../../components/form/Error";
-import removeKeyEmpty from "../../../utils/removeKeyEmpty.ts";
-import setErrors, {ParseError} from "../../../utils/setErros.ts";
-import {useState} from "react";
+import removeKeyEmpty from "../../../utils/removeKeyEmpty";
+import setErrors, {Errors, ParseError} from "../../../utils/setErros";
+import Form from "../../../components/form";
+
+import schema from "./schema.ts";
 
 interface FormData {
     email: string;
     phone: string;
     name: string;
     lastName: string;
+    cep: string;
 }
 
-const schema = zod.object({
-    name: zod.string(),
-    lastName: zod.string(),
-    phone: zod.string(),
-    email: zod.string().email("Email invalido"),
-})
 
 const Subscribe = () => {
     const {register, handleSubmit} = useForm<FormData>();
-    const [formErrors, setFromErrors] = useState<ParseError>();
+    const [formErrors, setFromErrors] = useState<Errors>({});
 
     const validate = (data: FormData) => {
         const clearData = removeKeyEmpty(data);
         try {
             schema.parse(clearData);
-            return false
-        } catch (e) {
-            const error = setErrors(e as ParseError) as ParseError;
-            setFromErrors(error);
-            console.log(error)
+            setFromErrors({});
             return true;
+        } catch (e) {
+            const error = setErrors(e as ParseError);
+            setFromErrors(error);
+            return false;
         }
     }
     const submit: SubmitHandler<FormData> = (data) => {
         const isValidate = validate(data)
-        if (isValidate) return
+        if (!isValidate) return
+        console.log(data);
     }
 
     function existError(key: string) {
         // eslint-disable-next-line no-prototype-builtins
-        if(formErrors && formErrors?.hasOwnProperty(key)) {
-            // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-            // @ts-expect-error
+        if (formErrors && formErrors?.hasOwnProperty(key)) {
             return formErrors[key]
         }
         return undefined;
@@ -56,7 +53,7 @@ const Subscribe = () => {
 
     return (
         <div className={`w-full flex justify-center`}>
-            <form className='flex flex-col gap-4 items-center' onSubmit={handleSubmit(submit)}>
+            <Form onSubmit={handleSubmit(submit)}>
                 <ContainerInput>
                     <Label name="Nome"/>
                     <Input {...register("name")} placeholder='Nome' error={existError("name")}/>
@@ -77,6 +74,11 @@ const Subscribe = () => {
                     <Input {...register("phone")} placeholder='Telefone' error={existError("phone")}/>
                     <Error error={existError("phone")}/>
                 </ContainerInput>
+                <ContainerInput>
+                    <Label name="Cep"/>
+                    <Input {...register("cep")} placeholder='Cep' error={existError("cep")}/>
+                    <Error error={existError("cep")}/>
+                </ContainerInput>
                 <button type="submit" className={`
                 bg-blue-500
                 text-white  
@@ -84,9 +86,10 @@ const Subscribe = () => {
                 py-1.5
                 rounded
                 hover:bg-blue-600
+                w-full
             `}>Subscribe
                 </button>
-            </form>
+            </Form>
         </div>
     )
 }
